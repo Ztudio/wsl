@@ -1,5 +1,6 @@
 "use client";
 
+import { LiquidGlassCard } from "@/components/uilayouts/liquid-glass";
 import { Menu, X } from "lucide-react";
 import { useState } from "react";
 import { LogoIcon } from "./shared";
@@ -10,53 +11,65 @@ export function Navbar() {
   const [open, setOpen] = useState(false);
 
   return (
-    <nav className="absolute left-0 right-0 top-0 z-30 px-6 py-5">
-      <div className="mx-auto flex max-w-[88rem] items-center justify-between">
-        <a href="#" className="flex items-center gap-2 text-black">
+    <header className="relative z-30 px-6 pt-6 md:px-12">
+      <LiquidGlassCard
+        draggable={false}
+        borderRadius="12px"
+        blurIntensity="sm"
+        glowIntensity="sm"
+        shadowIntensity="sm"
+        className="flex w-full items-center justify-between px-4 py-2"
+      >
+        <a href="#" className="relative z-30 flex items-center gap-2 text-white" aria-label="wsl home">
           <LogoIcon />
           <span className="text-2xl font-medium tracking-tight">wsl</span>
-          <span className="text-base text-black/45">وصل</span>
+          <span className="text-base text-white/50">وصل</span>
         </a>
 
-        <div className="hidden items-center gap-8 md:flex">
+        <div className="relative z-30 hidden items-center gap-8 md:flex">
           {links.map((link) => (
             <a
               key={link}
               href={`#${link.toLowerCase().replaceAll(" ", "-")}`}
-              className="text-base font-medium text-gray-700 transition-colors duration-200 hover:text-black"
+              className="text-sm text-white transition-colors duration-300 hover:text-gray-300"
             >
               {link}
             </a>
           ))}
         </div>
 
-        <div className="hidden md:block">
-          <a
-            href="#contact"
-            className="rounded-full bg-black px-7 py-2.5 text-base font-medium text-white transition-colors duration-200 hover:bg-gray-800"
-          >
-            Talk to us
-          </a>
-        </div>
+        <a
+          href="#contact"
+          className="relative z-30 hidden rounded-lg bg-white px-6 py-2 text-sm font-medium text-black transition-colors duration-300 hover:bg-gray-100 md:block"
+        >
+          Talk to us
+        </a>
 
         <button
           onClick={() => setOpen(!open)}
-          className="flex h-10 w-10 items-center justify-center rounded-full bg-black text-white md:hidden"
+          className="relative z-30 flex h-9 w-9 items-center justify-center rounded-lg bg-white text-black md:hidden"
           aria-label="Toggle menu"
         >
-          {open ? <X size={21} /> : <Menu size={21} />}
+          {open ? <X size={20} /> : <Menu size={20} />}
         </button>
-      </div>
+      </LiquidGlassCard>
 
       {open && (
-        <div className="mx-auto mt-4 max-w-[88rem] rounded-2xl bg-white/95 p-4 shadow-lg backdrop-blur md:hidden">
-          <div className="flex flex-col gap-1">
+        <LiquidGlassCard
+          draggable={false}
+          borderRadius="12px"
+          blurIntensity="sm"
+          glowIntensity="sm"
+          shadowIntensity="sm"
+          className="mt-3 w-full p-4 md:hidden"
+        >
+          <div className="relative z-30 flex flex-col gap-1">
             {links.map((link) => (
               <a
                 key={link}
                 href={`#${link.toLowerCase().replaceAll(" ", "-")}`}
                 onClick={() => setOpen(false)}
-                className="rounded-xl px-4 py-3 text-base font-medium text-gray-700 hover:bg-black/5 hover:text-black"
+                className="rounded-lg px-4 py-3 text-sm font-medium text-white hover:bg-white/10"
               >
                 {link}
               </a>
@@ -64,13 +77,13 @@ export function Navbar() {
             <a
               href="#contact"
               onClick={() => setOpen(false)}
-              className="mt-2 rounded-full bg-black px-5 py-3 text-center font-medium text-white"
+              className="mt-2 rounded-lg bg-white px-5 py-3 text-center text-sm font-medium text-black"
             >
               Talk to us
             </a>
           </div>
-        </div>
+        </LiquidGlassCard>
       )}
-    </nav>
+    </header>
   );
 }

@@ -1,75 +1,64 @@
-import type { CSSProperties } from "react";
-import { ArrowButton } from "./shared";
-
-const railBrands: Array<[string, CSSProperties]> = [
-  ["AED", { fontFamily: "Georgia, serif", fontWeight: 700, letterSpacing: "-0.02em", fontSize: 15 }],
-  ["EGP", { fontFamily: "Arial, sans-serif", fontWeight: 900, letterSpacing: "0.08em", fontSize: 13 }],
-  ["EUR", { fontFamily: "Trebuchet MS, sans-serif", fontWeight: 600, letterSpacing: "0.01em", fontSize: 15, fontStyle: "italic" }],
-  ["USD", { fontFamily: "Courier New, monospace", fontWeight: 700, letterSpacing: "0.12em", fontSize: 13 }],
-  ["GBP", { fontFamily: "Palatino, serif", fontWeight: 400, letterSpacing: "-0.01em", fontSize: 16 }],
-  ["SAR", { fontFamily: "Impact, Arial Narrow, sans-serif", fontWeight: 400, letterSpacing: "0.04em", fontSize: 14 }],
-  ["USDC", { fontFamily: "Verdana, sans-serif", fontWeight: 700, letterSpacing: "-0.03em", fontSize: 13 }],
-];
-
-function HeroMarquee() {
-  const all = [...railBrands, ...railBrands];
-
-  return (
-    <div className="mt-24 w-full max-w-md overflow-hidden">
-      <div className="marquee-track">
-        {all.map(([name, style], index) => (
-          <span
-            key={`${name}-${index}`}
-            className="mx-7 shrink-0 whitespace-nowrap text-black/60"
-            style={style}
-          >
-            {name}
-          </span>
-        ))}
-      </div>
-    </div>
-  );
-}
+import { LiquidGlassCard } from "@/components/uilayouts/liquid-glass";
+import { AnimatedHeading, FadeIn } from "./motion";
 
 export function HeroSection() {
   return (
-    <section className="flex-1 px-6 pb-6 pt-20">
-      <div
-        className="video-tint relative mx-auto h-full w-full max-w-[88rem] overflow-hidden rounded-2xl"
-        style={{ height: "calc(100vh - 96px)" }}
-      >
-        <video autoPlay muted loop playsInline className="absolute inset-0 h-full w-full object-cover">
-          <source
-            src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260423_161253_c72b1869-400f-45ed-ac0c-52f68c2ed5bd.mp4"
-            type="video/mp4"
+    <section className="flex flex-1 flex-col justify-end px-6 pb-12 pt-12 md:px-12 lg:pb-16">
+      <div className="w-full gap-10 lg:grid lg:grid-cols-2 lg:items-end">
+        <div>
+          <AnimatedHeading
+            lines={["Money moves.", "Borders don't."]}
+            className="mb-4 text-4xl font-normal leading-[0.98] text-white md:text-5xl lg:text-6xl xl:text-7xl"
+            ariaLabel="Money moves. Borders don't."
           />
-        </video>
 
-        <div className="relative z-10 flex h-full flex-col items-start justify-start p-7 pt-32 sm:p-10 sm:pt-36 md:p-12 md:pt-36">
-          <div className="max-w-2xl">
-            <p className="mb-4 text-sm font-medium uppercase tracking-[0.16em] text-black/55">
-              Cross-border payments for MENA
-            </p>
+          <FadeIn
+            as="p"
+            delay={800}
+            duration={1000}
+            className="mb-5 max-w-2xl text-base text-gray-300 md:text-lg"
+          >
+            Pay teams, contractors and suppliers across MENA in local currency, with
+            transparent conversion and stablecoin-powered settlement in minutes.
+          </FadeIn>
 
-            <h1
-              className="mb-4 max-w-xl text-5xl font-medium leading-tight text-black md:text-6xl"
-              style={{ letterSpacing: "-0.04em" }}
+          <FadeIn delay={1200} duration={1000} className="flex flex-wrap items-center gap-4">
+            <a
+              href="#contact"
+              className="rounded-lg bg-white px-8 py-3 font-medium text-black transition-colors duration-300 hover:bg-gray-100"
             >
-              Money moves.
-              <br />
-              Borders don&rsquo;t.
-            </h1>
+              Move with WSL
+            </a>
 
-            <p className="mb-8 max-w-lg font-sans text-base leading-relaxed text-black/70 md:text-lg">
-              Pay teams, contractors and suppliers across MENA in local currency, with
-              transparent conversion, stablecoin-powered settlement and delivery to
-              local bank accounts and wallets in minutes.
-            </p>
+            <a href="#how-it-works" className="relative z-10 block">
+              <LiquidGlassCard
+                draggable={false}
+                borderRadius="12px"
+                blurIntensity="sm"
+                glowIntensity="sm"
+                shadowIntensity="sm"
+                className="border border-white/20 px-8 py-3"
+              >
+                <span className="relative z-30 font-medium text-white">See how it works</span>
+              </LiquidGlassCard>
+            </a>
+          </FadeIn>
+        </div>
 
-            <ArrowButton>Move with WSL</ArrowButton>
-          </div>
-
-          <HeroMarquee />
+        <div className="mt-8 flex items-end justify-start lg:mt-0 lg:justify-end">
+          <FadeIn delay={1400} duration={1000}>
+            <LiquidGlassCard
+              borderRadius="12px"
+              blurIntensity="sm"
+              glowIntensity="sm"
+              shadowIntensity="sm"
+              className="border border-white/20 px-6 py-3"
+            >
+              <p className="relative z-30 text-lg font-light md:text-xl lg:text-2xl">
+                Payments. Conversion. Settlement.
+              </p>
+            </LiquidGlassCard>
+          </FadeIn>
         </div>
       </div>
     </section>
