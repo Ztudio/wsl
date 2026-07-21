@@ -31,7 +31,7 @@ export function Navbar() {
             <a
               key={link}
               href={`#${link.toLowerCase().replaceAll(" ", "-")}`}
-              className="text-sm text-black transition-colors duration-300 hover:text-gray-600"
+              className="rounded-lg px-3 py-1.5 text-sm text-black/60 transition-all duration-300 hover:bg-black/5 hover:text-black"
             >
               {link}
             </a>
