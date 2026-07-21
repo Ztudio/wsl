@@ -29,21 +29,21 @@ To learn more about Next.js, take a look at the following resources:
 
 You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
 
-## Deploy on Cloudflare Pages
+## Deploy on Cloudflare
 
-This app is configured for static export (`output: "export"` in `next.config.ts`), so it builds to a plain static `out/` directory with no server runtime required.
+This app is configured for static export (`output: "export"` in `next.config.ts`), so it builds to a plain static `out/` directory with no server runtime required. It deploys as a Cloudflare Workers Static Assets project (`wrangler.toml`'s `[assets] directory = "./out"`), Cloudflare's current recommended path for static sites.
 
-**Via the Cloudflare dashboard:**
+**Via the Cloudflare dashboard (Git integration):**
 
-1. Connect this repo in Cloudflare Pages.
+1. Connect this repo as a Workers project.
 2. Build command: `pnpm build`
-3. Build output directory: `out`
+3. Deploy command: `npx wrangler deploy`
 
 **Via Wrangler CLI:**
 
 ```bash
 pnpm build
-npx wrangler pages deploy out
+npx wrangler deploy
 ```
 
-`wrangler.toml` already points `pages_build_output_dir` at `out` for you.
+Local preview: `pnpm preview` (runs `wrangler dev` against the built `out/` directory).
