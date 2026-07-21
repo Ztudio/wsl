@@ -20,10 +20,10 @@ export function Navbar() {
         shadowIntensity="sm"
         className="flex w-full items-center justify-between px-4 py-2"
       >
-        <a href="#" className="relative z-30 flex items-center gap-2 text-white" aria-label="wsl home">
-          <LogoIcon />
+        <a href="#" className="relative z-30 flex items-center gap-2 text-black" aria-label="wsl home">
+          <LogoIcon className="h-7 w-7 text-black" />
           <span className="text-2xl font-medium tracking-tight">wsl</span>
-          <span className="text-base text-white/50">وصل</span>
+          <span className="text-base text-black/50">وصل</span>
         </a>
 
         <div className="relative z-30 hidden items-center gap-8 md:flex">
@@ -31,7 +31,7 @@ export function Navbar() {
             <a
               key={link}
               href={`#${link.toLowerCase().replaceAll(" ", "-")}`}
-              className="text-sm text-white transition-colors duration-300 hover:text-gray-300"
+              className="text-sm text-black transition-colors duration-300 hover:text-gray-600"
             >
               {link}
             </a>
@@ -69,7 +69,7 @@ export function Navbar() {
                 key={link}
                 href={`#${link.toLowerCase().replaceAll(" ", "-")}`}
                 onClick={() => setOpen(false)}
-                className="rounded-lg px-4 py-3 text-sm font-medium text-white hover:bg-white/10"
+                className="rounded-lg px-4 py-3 text-sm font-medium text-black hover:bg-black/10"
               >
                 {link}
               </a>
