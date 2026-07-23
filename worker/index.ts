@@ -1,17 +1,9 @@
 interface Env {
   ASSETS: { fetch(request: Request): Promise<Response> };
-  CONTACT_EMAIL: {
-    send(message: {
-      to: string;
-      from: string;
-      replyTo: string;
-      subject: string;
-      text: string;
-      html: string;
-    }): Promise<unknown>;
-  };
   TURNSTILE_SECRET: string;
 }
+
+const FORMSUBMIT_ENDPOINT = "https://formsubmit.co/ajax/tech@wslpay.com";
 
 type ContactPayload = {
   name?: unknown;
@@ -26,11 +18,6 @@ const json = (body: Record<string, string>, status = 200) =>
     status,
     headers: { "Content-Type": "application/json; charset=UTF-8", "Cache-Control": "no-store" },
   });
-
-const escapeHtml = (value: string) =>
-  value.replace(/[&<>'"]/g, (character) =>
-    ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;" })[character]!,
-  );
 
 const isEmail = (value: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
 
@@ -77,15 +64,18 @@ async function submitContact(request: Request, env: Env) {
   const challenge = await validateTurnstile(token, request, env.TURNSTILE_SECRET);
   if (!challenge.success) return json({ error: "Verification expired. Please try again." }, 403);
 
-  const text = `New WSL landing-page enquiry\n\nName: ${name}\nEmail: ${email}\n\nMessage:\n${message}`;
-  await env.CONTACT_EMAIL.send({
-    to: "tech@wslpay.com",
-    from: "contact@wslpay.com",
-    replyTo: email,
-    subject: `WSL enquiry from ${name}`,
-    text,
-    html: `<h1>New WSL landing-page enquiry</h1><p><strong>Name:</strong> ${escapeHtml(name)}<br><strong>Email:</strong> ${escapeHtml(email)}</p><p><strong>Message:</strong></p><p>${escapeHtml(message).replace(/\n/g, "<br>")}</p>`,
+  const forward = await fetch(FORMSUBMIT_ENDPOINT, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", Accept: "application/json" },
+    body: JSON.stringify({
+      name,
+      email,
+      message,
+      _subject: `WSL enquiry from ${name}`,
+      _replyto: email,
+    }),
   });
+  if (!forward.ok) return json({ error: "We couldn't send that just now. Please try again shortly." }, 502);
 
   return json({ ok: "true" });
 }

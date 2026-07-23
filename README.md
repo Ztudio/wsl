@@ -51,11 +51,11 @@ Local preview: `pnpm preview` (runs `wrangler dev` against the built `out/` dire
 ## Contact form
 
 The form submits to the first-party Worker route, `/api/contact`. The Worker validates
-Cloudflare Turnstile server-side and sends the enquiry through Cloudflare Email Service
-to `tech@wslpay.com` (the temporary testing recipient).
+Cloudflare Turnstile server-side, then forwards the enquiry to
+[FormSubmit](https://formsubmit.co)'s AJAX endpoint, which emails it to `tech@wslpay.com`.
+This avoids needing a verified sending domain in Cloudflare Email Service.
 
-Before deploying, onboard `wslpay.com` in **Compute > Email Service > Email Sending**
-and create a Turnstile widget for the deployed hostname. Configure its public key when
+Create a Turnstile widget for the deployed hostname, then configure its public key when
 building and its secret in Cloudflare:
 
 ```bash
@@ -64,6 +64,7 @@ pnpm wrangler secret put TURNSTILE_SECRET
 pnpm wrangler deploy
 ```
 
-The Worker sends from `contact@wslpay.com`, so the domain must be verified in Email
-Service. The `CONTACT_EMAIL` binding restricts delivery to `tech@wslpay.com`; update
-that allowlist and the Worker recipient together when the test recipient changes.
+The recipient lives in `FORMSUBMIT_ENDPOINT` in `worker/index.ts` — update it if the
+recipient changes. **FormSubmit requires a one-time confirmation**: the first enquiry
+sent to a new address triggers a confirmation email that must be opened and confirmed
+before further submissions are delivered.
