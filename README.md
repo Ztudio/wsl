@@ -47,3 +47,23 @@ npx wrangler deploy
 ```
 
 Local preview: `pnpm preview` (runs `wrangler dev` against the built `out/` directory).
+
+## Contact form
+
+The form submits to the first-party Worker route, `/api/contact`. The Worker validates
+Cloudflare Turnstile server-side and sends the enquiry through Cloudflare Email Service
+to `tech@wslpay.com` (the temporary testing recipient).
+
+Before deploying, onboard `wslpay.com` in **Compute > Email Service > Email Sending**
+and create a Turnstile widget for the deployed hostname. Configure its public key when
+building and its secret in Cloudflare:
+
+```bash
+NEXT_PUBLIC_TURNSTILE_SITE_KEY=<site-key> pnpm build
+pnpm wrangler secret put TURNSTILE_SECRET
+pnpm wrangler deploy
+```
+
+The Worker sends from `contact@wslpay.com`, so the domain must be verified in Email
+Service. The `CONTACT_EMAIL` binding restricts delivery to `tech@wslpay.com`; update
+that allowlist and the Worker recipient together when the test recipient changes.
