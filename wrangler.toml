@@ -1,4 +1,4 @@
-name = "wsl-landingpage"
+name = "wsl"
 compatibility_date = "2026-07-14"
 main = "./worker/index.ts"
 
