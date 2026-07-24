@@ -201,7 +201,7 @@
   }
 
   @keyframes cameraMove {
-    0%,24% { transform: translate(1035px, 261px) scale(2.3); }
+    0%,24% { transform: translate(675px, 201px) scale(1.5); }
     32%,62% { transform: translate(-3px, -34px) scale(1.25); }
     70%,96% { transform: translate(-472px, -26px) scale(1.05); }
     99%,100% { transform: translate(0, 0) scale(1); }
