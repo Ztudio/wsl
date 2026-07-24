@@ -132,6 +132,8 @@ async function submitContact(request: Request, env: Env) {
       message,
       _subject: `WSL enquiry from ${name}`,
       _replyto: email,
+      _captcha: "false",
+      _url: `${origin}/#contact`,
     }),
   });
 
