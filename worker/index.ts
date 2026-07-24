@@ -12,10 +12,10 @@ type ContactPayload = {
   email?: unknown;
   message?: unknown;
   honeypot?: unknown;
-  turnstileToken?: unknown;
 };
 
-type TurnstileResult = {
+// Future Turnstile scaffold. This is intentionally not called by the contact flow.
+export type TurnstileResult = {
   success?: boolean;
   "error-codes"?: string[];
 };
@@ -60,7 +60,7 @@ const getDeliveryOrigin = (request: Request, env: Env) => {
   return new URL(configuredOrigin).origin;
 };
 
-async function validateTurnstile(token: string, request: Request, secret: string) {
+export async function validateTurnstile(token: string, request: Request, secret: string) {
   const verification = await fetch("https://challenges.cloudflare.com/turnstile/v0/siteverify", {
     method: "POST",
     headers: { "Content-Type": "application/x-www-form-urlencoded" },
@@ -95,26 +95,9 @@ async function submitContact(request: Request, env: Env) {
   const name = typeof payload.name === "string" ? payload.name.trim() : "";
   const email = typeof payload.email === "string" ? payload.email.trim() : "";
   const message = typeof payload.message === "string" ? payload.message.trim() : "";
-  const token = typeof payload.turnstileToken === "string" ? payload.turnstileToken : "";
 
   if (!name || name.length > 120 || !isEmail(email) || !message || message.length > 5_000) {
     return json({ error: "Please complete the form with a valid work email." }, 400);
-  }
-  if (!localDevelopment) {
-    if (!token || !env.TURNSTILE_SECRET) {
-      return json({ error: "Please complete the verification and try again." }, 400);
-    }
-
-    const challenge = await validateTurnstile(token, request, env.TURNSTILE_SECRET);
-    if (!challenge.success) {
-      console.warn(
-        JSON.stringify({
-          event: "contact_turnstile_failed",
-          errorCodes: challenge["error-codes"] ?? [],
-        }),
-      );
-      return json({ error: "Verification expired. Please try again." }, 403);
-    }
   }
 
   const origin = getDeliveryOrigin(request, env);

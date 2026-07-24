@@ -49,13 +49,16 @@ Local preview: `pnpm preview` (runs `wrangler dev` against the built `out/` dire
 
 ## Contact form
 
-The form submits to the first-party Worker route, `/api/contact`. The Worker validates
-Cloudflare Turnstile server-side, then forwards the enquiry to
-[FormSubmit](https://formsubmit.co)'s AJAX endpoint, which emails it to `tech@wslpay.com`.
-This avoids needing a verified sending domain in Cloudflare Email Service.
+The form submits to the first-party Worker route, `/api/contact`, which forwards the
+enquiry to [FormSubmit](https://formsubmit.co)'s AJAX endpoint and emails it to
+`tech@wslpay.com`. This avoids needing a verified sending domain in Cloudflare Email
+Service.
 
-Create a Turnstile widget for the deployed hostname, then configure its public key when
-building and its secret in Cloudflare:
+The contact form currently has no CAPTCHA. The Worker retains a disabled Turnstile
+verification helper and secret binding as scaffolding for a future re-enable; it is not
+loaded by the frontend or called by `/api/contact`.
+
+To re-enable it later, configure a widget key at build time and its secret in Cloudflare:
 
 ```bash
 NEXT_PUBLIC_TURNSTILE_SITE_KEY=<site-key> pnpm build
@@ -63,23 +66,17 @@ pnpm wrangler secret put TURNSTILE_SECRET
 pnpm wrangler deploy
 ```
 
-The checked-in contact component includes the current widget's public site key as a
-production fallback, so dashboard and CLI builds cannot accidentally omit the widget.
-`NEXT_PUBLIC_TURNSTILE_SITE_KEY` can still override it when rotating widgets. The
-secret remains exclusively in Cloudflare's secret store.
-
 The recipient lives in `FORMSUBMIT_ENDPOINT` in `worker/index.ts` — update it if the
 recipient changes. **FormSubmit requires a one-time confirmation**: the first enquiry
 sent to a new address triggers a confirmation email that must be opened and confirmed
 before further submissions are delivered.
 
-Turnstile remains mandatory in production. The combined local dev server passes a
-`LOCAL_DEV` flag to Wrangler, which bypasses Turnstile only when the Worker itself is
-running on `localhost` or `127.0.0.1`. Test the local endpoint directly with:
+The combined local dev server runs the Worker on `localhost` for API testing. Test the
+local endpoint directly with:
 
 ```bash
 curl -i http://localhost:3000/api/contact \
   -H 'Content-Type: application/json' \
   -H 'Origin: http://localhost:3000' \
-  --data '{"name":"Local test","email":"you@example.com","message":"Testing the local contact API.","honeypot":"","turnstileToken":""}'
+  --data '{"name":"Local test","email":"you@example.com","message":"Testing the local contact API.","honeypot":""}'
 ```

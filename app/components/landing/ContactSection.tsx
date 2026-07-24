@@ -1,19 +1,8 @@
 "use client";
 
-import Script from "next/script";
 import { FormEvent, useRef, useState } from "react";
 
 type Status = "idle" | "sending" | "success" | "error";
-const turnstileSiteKey =
-  process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY ?? "0x4AAAAAAD8QQkORyLa0Igus";
-
-declare global {
-  interface Window {
-    turnstile?: {
-      reset: () => void;
-    };
-  }
-}
 
 export function ContactSection() {
   const [status, setStatus] = useState<Status>("idle");
@@ -38,7 +27,6 @@ export function ContactSection() {
           email: new FormData(form).get("email"),
           message: new FormData(form).get("message"),
           honeypot: new FormData(form).get("_honey"),
-          turnstileToken: new FormData(form).get("cf-turnstile-response"),
         }),
       });
 
@@ -47,10 +35,8 @@ export function ContactSection() {
         throw new Error(body?.error ?? "We couldn’t send that just now. Please try again shortly.");
       }
       form.reset();
-      window.turnstile?.reset();
       setStatus("success");
     } catch (error) {
-      window.turnstile?.reset();
       setErrorMessage(
         error instanceof Error
           ? error.message
@@ -96,17 +82,6 @@ export function ContactSection() {
             How can we help?
             <textarea required name="message" rows={4} className="min-h-28 rounded-lg border border-white/20 bg-white/10 px-4 py-3 text-base outline-none transition focus:border-white focus:ring-2 focus:ring-white/40" />
           </label>
-          {turnstileSiteKey ? (
-            <div className="flex min-h-[65px] justify-center sm:col-span-2">
-              <Script src="https://challenges.cloudflare.com/turnstile/v0/api.js" strategy="afterInteractive" />
-              <div
-                className="cf-turnstile"
-                data-sitekey={turnstileSiteKey}
-                data-action="turnstile-spin-v2"
-                data-theme="light"
-              />
-            </div>
-          ) : null}
           <button disabled={status === "sending"} className="min-h-11 justify-self-center rounded-full bg-white px-8 py-3 font-medium text-black transition-colors hover:bg-white/90 disabled:cursor-wait disabled:opacity-70 sm:col-span-2" type="submit">
             {status === "sending" ? "Sending…" : "Send enquiry"}
           </button>
