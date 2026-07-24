@@ -13,6 +13,16 @@ type ContactPayload = {
   turnstileToken?: unknown;
 };
 
+type TurnstileResult = {
+  success?: boolean;
+  "error-codes"?: string[];
+};
+
+type FormSubmitResult = {
+  success?: boolean | string;
+  message?: string;
+};
+
 const json = (body: Record<string, string>, status = 200) =>
   new Response(JSON.stringify(body), {
     status,
@@ -31,7 +41,10 @@ async function validateTurnstile(token: string, request: Request, secret: string
       remoteip: request.headers.get("CF-Connecting-IP") ?? "",
     }),
   });
-  return (await verification.json()) as { success?: boolean };
+  if (!verification.ok) {
+    return { success: false, "error-codes": ["internal-error"] } satisfies TurnstileResult;
+  }
+  return (await verification.json()) as TurnstileResult;
 }
 
 async function submitContact(request: Request, env: Env) {
@@ -62,11 +75,25 @@ async function submitContact(request: Request, env: Env) {
   }
 
   const challenge = await validateTurnstile(token, request, env.TURNSTILE_SECRET);
-  if (!challenge.success) return json({ error: "Verification expired. Please try again." }, 403);
+  if (!challenge.success) {
+    console.warn(
+      JSON.stringify({
+        event: "contact_turnstile_failed",
+        errorCodes: challenge["error-codes"] ?? [],
+      }),
+    );
+    return json({ error: "Verification expired. Please try again." }, 403);
+  }
 
+  const origin = new URL(request.url).origin;
   const forward = await fetch(FORMSUBMIT_ENDPOINT, {
     method: "POST",
-    headers: { "Content-Type": "application/json", Accept: "application/json" },
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+      Origin: origin,
+      Referer: `${origin}/`,
+    },
     body: JSON.stringify({
       name,
       email,
@@ -75,14 +102,41 @@ async function submitContact(request: Request, env: Env) {
       _replyto: email,
     }),
   });
-  if (!forward.ok) return json({ error: "We couldn't send that just now. Please try again shortly." }, 502);
+
+  if (!forward.ok) {
+    console.warn(
+      JSON.stringify({
+        event: "contact_forward_failed",
+        status: forward.status,
+        message: "FormSubmit returned an HTTP error",
+      }),
+    );
+    return json({ error: "We couldn't send that just now. Please try again shortly." }, 502);
+  }
+
+  const forwardResult = (await forward.json().catch(() => null)) as FormSubmitResult | null;
+  const wasForwarded =
+    forwardResult?.success === true || forwardResult?.success === "true";
+
+  if (!wasForwarded) {
+    console.warn(
+      JSON.stringify({
+        event: "contact_forward_failed",
+        status: forward.status,
+        message: forwardResult?.message ?? "Invalid FormSubmit response",
+      }),
+    );
+    return json({ error: "We couldn't send that just now. Please try again shortly." }, 502);
+  }
 
   return json({ ok: "true" });
 }
 
-export default {
+const worker = {
   async fetch(request: Request, env: Env): Promise<Response> {
     if (new URL(request.url).pathname === "/api/contact") return submitContact(request, env);
     return env.ASSETS.fetch(request);
   },
 };
+
+export default worker;

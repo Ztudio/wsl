@@ -1,17 +1,31 @@
 "use client";
 
 import Script from "next/script";
-import { FormEvent, useState } from "react";
+import { FormEvent, useRef, useState } from "react";
 
 type Status = "idle" | "sending" | "success" | "error";
 const turnstileSiteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
 
+declare global {
+  interface Window {
+    turnstile?: {
+      reset: () => void;
+    };
+  }
+}
+
 export function ContactSection() {
   const [status, setStatus] = useState<Status>("idle");
+  const [errorMessage, setErrorMessage] = useState("");
+  const submittingRef = useRef(false);
 
   async function submitForm(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (submittingRef.current) return;
+
+    submittingRef.current = true;
     setStatus("sending");
+    setErrorMessage("");
 
     const form = event.currentTarget;
     try {
@@ -32,9 +46,18 @@ export function ContactSection() {
         throw new Error(body?.error ?? "We couldn’t send that just now. Please try again shortly.");
       }
       form.reset();
+      window.turnstile?.reset();
       setStatus("success");
-    } catch {
+    } catch (error) {
+      window.turnstile?.reset();
+      setErrorMessage(
+        error instanceof Error
+          ? error.message
+          : "We couldn’t send that just now. Please try again shortly.",
+      );
       setStatus("error");
+    } finally {
+      submittingRef.current = false;
     }
   }
 
@@ -52,7 +75,14 @@ export function ContactSection() {
         </p>
 
         <form onSubmit={submitForm} className="grid w-full gap-4 text-left sm:grid-cols-2">
-          <input type="text" name="_honey" className="hidden" tabIndex={-1} autoComplete="off" />
+          <input
+            type="text"
+            name="_honey"
+            className="hidden"
+            tabIndex={-1}
+            autoComplete="off"
+            aria-hidden="true"
+          />
           <label className="grid gap-2 text-sm font-medium">
             Name
             <input required name="name" autoComplete="name" className="min-h-11 rounded-lg border border-white/20 bg-white/10 px-4 text-base outline-none transition focus:border-white focus:ring-2 focus:ring-white/40" />
@@ -78,7 +108,7 @@ export function ContactSection() {
 
         <p className="mt-5 min-h-6 text-sm text-white/65" aria-live="polite">
           {status === "success" && "Thanks — your enquiry has been sent. We’ll be in touch shortly."}
-          {status === "error" && "We couldn’t send that just now. Please try again shortly."}
+          {status === "error" && errorMessage}
         </p>
         <p className="text-sm text-white/45">hello@wslpay.com · Dubai, UAE</p>
       </div>
