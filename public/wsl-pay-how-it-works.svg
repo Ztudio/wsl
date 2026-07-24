@@ -4,7 +4,7 @@
 <mask id="mask0_14_14" style="mask-type:luminance" maskUnits="userSpaceOnUse" x="0" y="0" width="1163" height="554">
 <path d="M1163 0H0V554H1163V0Z" fill="white"/>
 </mask>
-<g mask="url(#mask0_14_14)">
+<g id="camera-stage" mask="url(#mask0_14_14)">
 <g opacity="0.2">
 <path d="M1682.99 219.816L-110.99 736.186" stroke="black" stroke-dasharray="7 7"/>
 </g>
@@ -104,7 +104,7 @@
 <path class="scene-part receiver-box receiver-top" d="M1113.78 80.006L1053.28 97.506M1053.28 97.506L1053.1 175.972M1053.28 97.506L951.777 68.506" stroke="#B3B0AD"/>
 <path class="scene-part receiver-box receiver-top" d="M951.599 67.848V146.974L1053.1 175.974L1113.6 158.474V79.348L1014.6 49.848L951.599 67.848Z" stroke="#B3B0AD" stroke-width="1.5"/>
 </g>
-<g clip-path="url(#clip2_14_14)">
+<g class="camera-attached" clip-path="url(#clip2_14_14)">
 <path class="scene-part foundation-part" d="M320.253 304.229L298.88 298.1C293.633 296.596 289.38 299.801 289.38 305.259V327.494C289.38 332.952 293.633 338.596 298.88 340.1L320.253 346.229C325.5 347.733 329.753 344.529 329.753 339.071V316.835C329.753 311.378 325.5 305.733 320.253 304.229Z" fill="#141414"/>
 <path class="scene-part foundation-part" d="M302.039 317.495C301.505 315.49 299.629 313.901 297.849 313.947C296.07 313.992 295.06 315.653 295.594 317.658L298.816 317.576L302.039 317.495ZM306.664 320.507L309.856 320.315C309.398 318.755 308.112 317.422 306.664 317.007C305.216 316.592 303.93 317.187 303.472 318.485L306.664 320.507ZM317.781 327.777L319.737 331.186C319.758 331.176 319.779 331.166 319.8 331.156L317.781 327.777ZM319.922 328.454C321.761 329.254 323.465 328.413 323.728 326.575C323.991 324.737 322.713 322.598 320.873 321.797L320.397 325.125L319.922 328.454ZM298.816 317.576L295.594 317.658C296.161 319.789 296.941 321.753 297.986 323.386C299.029 325.018 300.563 326.644 302.553 327.33C304.579 328.028 306.223 327.459 307.35 326.52C308.46 325.596 309.273 324.18 309.856 322.529L306.664 320.507L303.472 318.485C303.074 319.614 302.66 320.142 302.422 320.341C302.2 320.525 302.372 320.257 302.927 320.448C303.445 320.626 303.508 320.938 303.202 320.461C302.898 319.985 302.452 319.047 302.039 317.495L298.816 317.576ZM306.664 320.507L303.472 320.698C304.664 324.759 306.889 328.364 310.178 330.448C313.47 332.533 316.876 332.491 319.737 331.186L317.781 327.777L315.826 324.368C314.109 325.151 312.938 324.817 312.306 324.417C311.67 324.014 310.626 322.94 309.856 320.315L306.664 320.507ZM317.781 327.777L319.8 331.156C322.903 329.625 324.943 327.019 325.219 323.933C325.361 322.357 325.037 320.443 323.837 318.633C322.602 316.77 320.843 315.63 319.089 315.127V318.627V322.127C319.298 322.187 319.011 322.149 318.715 321.704C318.455 321.312 318.54 321.13 318.518 321.378C318.468 321.94 317.892 323.347 315.763 324.398L317.781 327.777ZM319.089 318.627V315.127C317.294 314.612 315.675 314.938 314.612 316.059C313.605 317.122 313.29 318.686 313.459 320.228C313.815 323.474 316.242 326.851 319.922 328.454L320.397 325.125L320.873 321.797C320.369 321.577 320.192 321.359 320.16 321.317C320.113 321.255 320.134 321.253 320.142 321.326C320.147 321.376 320.16 321.631 319.929 321.874C319.81 322 319.648 322.092 319.462 322.131C319.277 322.169 319.136 322.141 319.089 322.127V318.627Z" fill="white"/>
 </g>
@@ -123,8 +123,15 @@
 
 <style>
   :root {
-    --flow-duration: 12s;
+    --flow-duration: 18s;
     --flow-green: #16725b;
+  }
+
+  #camera-stage,
+  .camera-attached {
+    transform-box: view-box;
+    transform-origin: 50% 50%;
+    animation: cameraMove var(--flow-duration) cubic-bezier(.45,0,.2,1) infinite;
   }
 
   .scene-part {
@@ -187,36 +194,45 @@
 
   .wsl-paused .scene-part,
   .wsl-paused .route-base,
-  .wsl-paused .route-pulse {
+  .wsl-paused .route-pulse,
+  .wsl-paused #camera-stage,
+  .wsl-paused .camera-attached {
     animation-play-state: paused;
   }
 
-  @keyframes senderBottom { 0%,1%{opacity:0;transform:translateY(-28px)} 5%,92%{opacity:1;transform:translateY(0)} 96%,100%{opacity:0;transform:translateY(0)} }
-  @keyframes senderTop { 0%,4%{opacity:0;transform:translateY(-34px)} 8%,92%{opacity:1;transform:translateY(0)} 96%,100%{opacity:0;transform:translateY(0)} }
-  @keyframes senderCopyBottom { 0%,9%{opacity:0;transform:translateY(4px)} 12%,92%{opacity:1;transform:translateY(0)} 96%,100%{opacity:0} }
-  @keyframes senderCopyTop { 0%,12%{opacity:0;transform:translateY(4px)} 15%,92%{opacity:1;transform:translateY(0)} 96%,100%{opacity:0} }
-  @keyframes routeInBase { 0%,39%{opacity:0} 43%,92%{opacity:.42} 96%,100%{opacity:0} }
-  @keyframes foundationRise { 0%,17%{opacity:0;transform:translateY(55px)} 22%,92%{opacity:1;transform:translateY(0)} 96%,100%{opacity:0} }
-  @keyframes processorYellow { 0%,23%{opacity:0;transform:translateY(-70px)} 28%,92%{opacity:1;transform:translateY(0)} 96%,100%{opacity:0} }
-  @keyframes processorBlue { 0%,27%{opacity:0;transform:translateY(-78px)} 32%,92%{opacity:1;transform:translateY(0)} 96%,100%{opacity:0} }
-  @keyframes processorRed { 0%,31%{opacity:0;transform:translateY(-86px)} 36%,92%{opacity:1;transform:translateY(0)} 96%,100%{opacity:0} }
-  @keyframes activeYellow { 0%,37%{filter:brightness(1) saturate(1)} 39%,43%{filter:brightness(1.22) saturate(1.18) drop-shadow(0 0 7px rgba(235,185,69,.8))} 47%,100%{filter:brightness(1) saturate(1)} }
-  @keyframes activeBlue { 0%,42%{filter:brightness(1) saturate(1)} 44%,48%{filter:brightness(1.22) saturate(1.18) drop-shadow(0 0 7px rgba(159,111,225,.8))} 52%,100%{filter:brightness(1) saturate(1)} }
-  @keyframes activeRed { 0%,47%{filter:brightness(1) saturate(1)} 49%,53%{filter:brightness(1.22) saturate(1.18) drop-shadow(0 0 7px rgba(240,94,189,.8))} 57%,100%{filter:brightness(1) saturate(1)} }
-  @keyframes processorInfra { 0%,35%{opacity:0;transform:translateY(-10px)} 39%,92%{opacity:1;transform:translateY(0)} 96%,100%{opacity:0} }
-  @keyframes processorCopyYellow { 0%,39%{opacity:0;transform:translateY(5px)} 43%,92%{opacity:1;transform:translateY(0)} 96%,100%{opacity:0} }
-  @keyframes processorCopyBlue { 0%,44%{opacity:0;transform:translateY(5px)} 48%,92%{opacity:1;transform:translateY(0)} 96%,100%{opacity:0} }
-  @keyframes processorCopyRed { 0%,49%{opacity:0;transform:translateY(5px)} 53%,92%{opacity:1;transform:translateY(0)} 96%,100%{opacity:0} }
-  @keyframes routeOutBase { 0%,74%{opacity:0} 78%,92%{opacity:.42} 96%,100%{opacity:0} }
-  @keyframes receiverBeam { 0%,53%{opacity:0;transform:translateY(150px)} 60%,92%{opacity:1;transform:translateY(0)} 96%,100%{opacity:0} }
-  @keyframes receiverBottom { 0%,57%{opacity:0;transform:translateY(-150px)} 63%,92%{opacity:1;transform:translateY(0)} 96%,100%{opacity:0} }
-  @keyframes receiverMiddle { 0%,62%{opacity:0;transform:translateY(-170px)} 68%,92%{opacity:1;transform:translateY(0)} 96%,100%{opacity:0} }
-  @keyframes receiverTop { 0%,67%{opacity:0;transform:translateY(-190px)} 73%,92%{opacity:1;transform:translateY(0)} 96%,100%{opacity:0} }
-  @keyframes receiverCopyTop { 0%,73%{opacity:0;transform:translateY(5px)} 77%,92%{opacity:1;transform:translateY(0)} 96%,100%{opacity:0} }
-  @keyframes receiverCopyMiddle { 0%,77%{opacity:0;transform:translateY(5px)} 81%,92%{opacity:1;transform:translateY(0)} 96%,100%{opacity:0} }
-  @keyframes receiverCopyBottom { 0%,81%{opacity:0;transform:translateY(5px)} 85%,92%{opacity:1;transform:translateY(0)} 96%,100%{opacity:0} }
-  @keyframes routePulseIn { 0%,40%{opacity:0;stroke-dashoffset:240} 44%{opacity:.8} 54%{opacity:.8;stroke-dashoffset:-500} 58%,100%{opacity:0;stroke-dashoffset:-560} }
-  @keyframes routePulseOut { 0%,75%{opacity:0;stroke-dashoffset:220} 79%{opacity:.8} 89%{opacity:.8;stroke-dashoffset:-520} 93%,100%{opacity:0;stroke-dashoffset:-580} }
+  @keyframes cameraMove {
+    0%,24% { transform: translate(1035px, 261px) scale(2.3); }
+    32%,62% { transform: translate(-3px, -34px) scale(1.25); }
+    70%,96% { transform: translate(-472px, -26px) scale(1.05); }
+    99%,100% { transform: translate(0, 0) scale(1); }
+  }
+
+  @keyframes senderBottom { 0%,1%{opacity:0;transform:translateY(-28px)} 5%,24%{opacity:1;transform:translateY(0)} 28%{opacity:1;transform:translateX(-75px)} 32%,100%{opacity:0;transform:translateX(-140px)} }
+  @keyframes senderTop { 0%,4%{opacity:0;transform:translateY(-34px)} 8%,24%{opacity:1;transform:translateY(0)} 28%{opacity:1;transform:translateX(-75px)} 32%,100%{opacity:0;transform:translateX(-140px)} }
+  @keyframes senderCopyBottom { 0%,9%{opacity:0;transform:translateY(4px)} 12%,24%{opacity:1;transform:translateY(0)} 28%{opacity:1;transform:translateX(-75px)} 32%,100%{opacity:0;transform:translateX(-140px)} }
+  @keyframes senderCopyTop { 0%,12%{opacity:0;transform:translateY(4px)} 15%,24%{opacity:1;transform:translateY(0)} 28%{opacity:1;transform:translateX(-75px)} 32%,100%{opacity:0;transform:translateX(-140px)} }
+  @keyframes routeInBase { 0%,25%{opacity:0} 29%,62%{opacity:.34} 66%,100%{opacity:0} }
+  @keyframes foundationRise { 0%,25%{opacity:0;transform:translateY(55px)} 31%,62%{opacity:1;transform:translateY(0)} 66%{opacity:1;transform:translateX(-70px)} 70%,100%{opacity:0;transform:translateX(-140px)} }
+  @keyframes processorYellow { 0%,27%{opacity:0;transform:translateY(-70px)} 33%,62%{opacity:1;transform:translateY(0)} 66%{opacity:1;transform:translateX(-70px)} 70%,100%{opacity:0;transform:translateX(-140px)} }
+  @keyframes processorBlue { 0%,31%{opacity:0;transform:translateY(-78px)} 37%,62%{opacity:1;transform:translateY(0)} 66%{opacity:1;transform:translateX(-70px)} 70%,100%{opacity:0;transform:translateX(-140px)} }
+  @keyframes processorRed { 0%,35%{opacity:0;transform:translateY(-86px)} 41%,62%{opacity:1;transform:translateY(0)} 66%{opacity:1;transform:translateX(-70px)} 70%,100%{opacity:0;transform:translateX(-140px)} }
+  @keyframes activeYellow { 0%,42%{filter:brightness(1) saturate(1)} 44%,48%{filter:brightness(1.22) saturate(1.18) drop-shadow(0 0 7px rgba(235,185,69,.8))} 50%,100%{filter:brightness(1) saturate(1)} }
+  @keyframes activeBlue { 0%,48%{filter:brightness(1) saturate(1)} 50%,54%{filter:brightness(1.22) saturate(1.18) drop-shadow(0 0 7px rgba(159,111,225,.8))} 56%,100%{filter:brightness(1) saturate(1)} }
+  @keyframes activeRed { 0%,54%{filter:brightness(1) saturate(1)} 56%,60%{filter:brightness(1.22) saturate(1.18) drop-shadow(0 0 7px rgba(240,94,189,.8))} 62%,100%{filter:brightness(1) saturate(1)} }
+  @keyframes processorInfra { 0%,37%{opacity:0;transform:translateY(-10px)} 41%,62%{opacity:1;transform:translateY(0)} 66%{opacity:1;transform:translateX(-70px)} 70%,100%{opacity:0;transform:translateX(-140px)} }
+  @keyframes processorCopyYellow { 0%,40%{opacity:0;transform:translateY(5px)} 44%,62%{opacity:1;transform:translateY(0)} 66%{opacity:1;transform:translateX(-70px)} 70%,100%{opacity:0;transform:translateX(-140px)} }
+  @keyframes processorCopyBlue { 0%,46%{opacity:0;transform:translateY(5px)} 50%,62%{opacity:1;transform:translateY(0)} 66%{opacity:1;transform:translateX(-70px)} 70%,100%{opacity:0;transform:translateX(-140px)} }
+  @keyframes processorCopyRed { 0%,52%{opacity:0;transform:translateY(5px)} 56%,62%{opacity:1;transform:translateY(0)} 66%{opacity:1;transform:translateX(-70px)} 70%,100%{opacity:0;transform:translateX(-140px)} }
+  @keyframes routeOutBase { 0%,82%{opacity:0} 86%,96%{opacity:.34} 99%,100%{opacity:0} }
+  @keyframes receiverBeam { 0%,63%{opacity:0;transform:translateY(150px)} 70%,96%{opacity:1;transform:translateY(0)} 99%,100%{opacity:0} }
+  @keyframes receiverBottom { 0%,65%{opacity:0;transform:translateY(-150px)} 71%,96%{opacity:1;transform:translateY(0)} 99%,100%{opacity:0} }
+  @keyframes receiverMiddle { 0%,69%{opacity:0;transform:translateY(-170px)} 75%,96%{opacity:1;transform:translateY(0)} 99%,100%{opacity:0} }
+  @keyframes receiverTop { 0%,73%{opacity:0;transform:translateY(-190px)} 79%,96%{opacity:1;transform:translateY(0)} 99%,100%{opacity:0} }
+  @keyframes receiverCopyTop { 0%,78%{opacity:0;transform:translateY(5px)} 82%,96%{opacity:1;transform:translateY(0)} 99%,100%{opacity:0} }
+  @keyframes receiverCopyMiddle { 0%,82%{opacity:0;transform:translateY(5px)} 86%,96%{opacity:1;transform:translateY(0)} 99%,100%{opacity:0} }
+  @keyframes receiverCopyBottom { 0%,86%{opacity:0;transform:translateY(5px)} 90%,96%{opacity:1;transform:translateY(0)} 99%,100%{opacity:0} }
+  @keyframes routePulseIn { 0%,26%{opacity:0;stroke-dashoffset:240} 30%{opacity:.7} 42%{opacity:.7;stroke-dashoffset:-500} 46%,100%{opacity:0;stroke-dashoffset:-560} }
+  @keyframes routePulseOut { 0%,83%{opacity:0;stroke-dashoffset:220} 87%{opacity:.7} 95%{opacity:.7;stroke-dashoffset:-520} 98%,100%{opacity:0;stroke-dashoffset:-580} }
 
   @media (prefers-reduced-motion: reduce) {
     .scene-part,
