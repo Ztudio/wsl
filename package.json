@@ -3,7 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "node scripts/dev.mjs",
+    "dev:next": "next dev",
+    "dev:worker": "wrangler dev --ip 127.0.0.1 --port 8787 --var LOCAL_DEV:true --var PUBLIC_SITE_ORIGIN:https://wsl.sagar-7e7.workers.dev",
     "build": "next build",
     "start": "next start",
     "lint": "eslint",

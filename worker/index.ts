@@ -1,6 +1,8 @@
 interface Env {
   ASSETS: { fetch(request: Request): Promise<Response> };
-  TURNSTILE_SECRET: string;
+  TURNSTILE_SECRET?: string;
+  LOCAL_DEV?: string;
+  PUBLIC_SITE_ORIGIN?: string;
 }
 
 const FORMSUBMIT_ENDPOINT = "https://formsubmit.co/ajax/tech@wslpay.com";
@@ -31,6 +33,33 @@ const json = (body: Record<string, string>, status = 200) =>
 
 const isEmail = (value: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
 
+const isLocalHostname = (hostname: string) =>
+  hostname === "localhost" || hostname === "127.0.0.1" || hostname === "::1";
+
+const isLocalDevelopment = (request: Request, env: Env) => {
+  const requestUrl = new URL(request.url);
+  return env.LOCAL_DEV === "true" && isLocalHostname(requestUrl.hostname);
+};
+
+const hasValidOrigin = (request: Request, localDevelopment: boolean) => {
+  const origin = request.headers.get("Origin");
+  if (!origin) return false;
+
+  try {
+    const originUrl = new URL(origin);
+    if (localDevelopment) return isLocalHostname(originUrl.hostname);
+    return originUrl.origin === new URL(request.url).origin;
+  } catch {
+    return false;
+  }
+};
+
+const getDeliveryOrigin = (request: Request, env: Env) => {
+  const configuredOrigin = env.PUBLIC_SITE_ORIGIN?.trim();
+  if (!configuredOrigin) return new URL(request.url).origin;
+  return new URL(configuredOrigin).origin;
+};
+
 async function validateTurnstile(token: string, request: Request, secret: string) {
   const verification = await fetch("https://challenges.cloudflare.com/turnstile/v0/siteverify", {
     method: "POST",
@@ -49,7 +78,8 @@ async function validateTurnstile(token: string, request: Request, secret: string
 
 async function submitContact(request: Request, env: Env) {
   if (request.method !== "POST") return json({ error: "Method not allowed." }, 405);
-  if (request.headers.get("Origin") !== new URL(request.url).origin) {
+  const localDevelopment = isLocalDevelopment(request, env);
+  if (!hasValidOrigin(request, localDevelopment)) {
     return json({ error: "Invalid request origin." }, 403);
   }
 
@@ -70,22 +100,24 @@ async function submitContact(request: Request, env: Env) {
   if (!name || name.length > 120 || !isEmail(email) || !message || message.length > 5_000) {
     return json({ error: "Please complete the form with a valid work email." }, 400);
   }
-  if (!token || !env.TURNSTILE_SECRET) {
-    return json({ error: "Please complete the verification and try again." }, 400);
+  if (!localDevelopment) {
+    if (!token || !env.TURNSTILE_SECRET) {
+      return json({ error: "Please complete the verification and try again." }, 400);
+    }
+
+    const challenge = await validateTurnstile(token, request, env.TURNSTILE_SECRET);
+    if (!challenge.success) {
+      console.warn(
+        JSON.stringify({
+          event: "contact_turnstile_failed",
+          errorCodes: challenge["error-codes"] ?? [],
+        }),
+      );
+      return json({ error: "Verification expired. Please try again." }, 403);
+    }
   }
 
-  const challenge = await validateTurnstile(token, request, env.TURNSTILE_SECRET);
-  if (!challenge.success) {
-    console.warn(
-      JSON.stringify({
-        event: "contact_turnstile_failed",
-        errorCodes: challenge["error-codes"] ?? [],
-      }),
-    );
-    return json({ error: "Verification expired. Please try again." }, 403);
-  }
-
-  const origin = new URL(request.url).origin;
+  const origin = getDeliveryOrigin(request, env);
   const forward = await fetch(FORMSUBMIT_ENDPOINT, {
     method: "POST",
     headers: {

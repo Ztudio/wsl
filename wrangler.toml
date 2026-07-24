@@ -2,6 +2,24 @@ name = "wsl"
 compatibility_date = "2026-07-14"
 main = "./worker/index.ts"
 
+[vars]
+PUBLIC_SITE_ORIGIN = "https://wsl.sagar-7e7.workers.dev"
+
+[observability]
+enabled = true
+head_sampling_rate = 1
+
+[observability.logs]
+enabled = true
+head_sampling_rate = 1
+invocation_logs = true
+persist = true
+
+[observability.traces]
+enabled = true
+head_sampling_rate = 1
+persist = true
+
 [assets]
 directory = "./out"
 binding = "ASSETS"

@@ -5,16 +5,15 @@ This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-
 First, run the development server:
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
 pnpm dev
-# or
-bun dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+
+`pnpm dev` runs Next.js and the local Cloudflare Worker behind the same origin. This
+makes the form's `/api/contact` route work locally while preserving Next's static
+export for production. Use `pnpm dev:next` only when working on UI that does not need
+the contact API.
 
 You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 
@@ -64,7 +63,23 @@ pnpm wrangler secret put TURNSTILE_SECRET
 pnpm wrangler deploy
 ```
 
+The checked-in contact component includes the current widget's public site key as a
+production fallback, so dashboard and CLI builds cannot accidentally omit the widget.
+`NEXT_PUBLIC_TURNSTILE_SITE_KEY` can still override it when rotating widgets. The
+secret remains exclusively in Cloudflare's secret store.
+
 The recipient lives in `FORMSUBMIT_ENDPOINT` in `worker/index.ts` — update it if the
 recipient changes. **FormSubmit requires a one-time confirmation**: the first enquiry
 sent to a new address triggers a confirmation email that must be opened and confirmed
 before further submissions are delivered.
+
+Turnstile remains mandatory in production. The combined local dev server passes a
+`LOCAL_DEV` flag to Wrangler, which bypasses Turnstile only when the Worker itself is
+running on `localhost` or `127.0.0.1`. Test the local endpoint directly with:
+
+```bash
+curl -i http://localhost:3000/api/contact \
+  -H 'Content-Type: application/json' \
+  -H 'Origin: http://localhost:3000' \
+  --data '{"name":"Local test","email":"you@example.com","message":"Testing the local contact API.","honeypot":"","turnstileToken":""}'
+```
