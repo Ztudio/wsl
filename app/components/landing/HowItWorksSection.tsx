@@ -1,3 +1,5 @@
+import Image from "next/image";
+
 const steps: Array<[string, string, string]> = [
   ["1", "Fund", "Add money by local bank transfer or supported collection rail."],
   ["2", "Convert", "WSL locks the rate and moves value over stablecoin settlement infrastructure."],
@@ -17,6 +19,20 @@ export function HowItWorksSection() {
             Local in. Digital in the middle. Local out.
           </h2>
         </div>
+
+        <figure className="mb-14 overflow-hidden rounded-[28px] bg-white p-2 shadow-2xl shadow-black/30 ring-1 ring-white/15 sm:p-3">
+          <Image
+            src="/wsl-pay-how-it-works.svg"
+            width={1163}
+            height={554}
+            alt="Animated WSL Pay flow from business AED accounts through approval and conversion to employee EGP payouts"
+            className="block h-auto w-full"
+            unoptimized
+          />
+          <figcaption className="sr-only">
+            Business funds move through WSL approval, licensed partner conversion, and employee payouts.
+          </figcaption>
+        </figure>
 
         <div className="grid gap-4 md:grid-cols-3">
           {steps.map(([number, title, body]) => (
